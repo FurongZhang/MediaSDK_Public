@@ -2110,24 +2110,32 @@ typedef struct {
 } mfxExtVPPScaling;
 MFX_PACK_END()
 
-enum MFX_3DLUT_CHANNEL_MAPPING {
-    MFX_3DLUT_CHANNEL_MAPPING_RGBX_RGBX = 0,
-    MFX_3DLUT_CHANNEL_MAPPING_YUVX_RGBX = 1,
-    MFX_3DLUT_CHANNEL_MAPPING_VUYX_RGBX = 2
-};
+typedef enum {
+    MFX_3DLUT_CHANNEL_MAPPING_DEFAULT            = 0,
+    MFX_3DLUT_CHANNEL_MAPPING_RGB_RGB            = 1,
+    MFX_3DLUT_CHANNEL_MAPPING_YUV_RGB            = 2,
+    MFX_3DLUT_CHANNEL_MAPPING_VUY_RGB            = 3
+} mfx3DLutChannelMapping;
+
+typedef enum {
+    MFX_3DLUT_MEMORY_LAYOUT_DEFAULT              = 0,
+
+    MFX_3DLUT_MEMORY_LAYOUT_VENDOR               = 0x1000,
+    MFX_3DLUT_MEMORY_LAYOUT_INTEL_17LUT          = MFX_3DLUT_MEMORY_LAYOUT_VENDOR + (1 << 0),
+    MFX_3DLUT_MEMORY_LAYOUT_INTEL_33LUT          = MFX_3DLUT_MEMORY_LAYOUT_VENDOR + (1 << 1),
+    MFX_3DLUT_MEMORY_LAYOUT_INTEL_65LUT          = MFX_3DLUT_MEMORY_LAYOUT_VENDOR + (1 << 2)
+} mfx3DLutMemoryLayout;
 
 MFX_PACK_BEGIN_USUAL_STRUCT()
 typedef struct {
     mfxExtBuffer Header;
 
-    mfxMemId  Mem3DLut;    // App create 3DLUT memory, pass to MSDK, must be linear for XPU
-    mfxU16    IOPattern;
+    mfxMemId                    MemID;
+    mfxU16                      Size;
+    mfxVariantType              DataPrecision;
+    mfx3DLutMemoryLayout        MemoryLayout;
+    mfx3DLutChannelMapping      ChannelMapping;
 
-    mfxU16    SegmentSize;
-    mfxU16    MultipleSize;
-    mfxU16    BitDepth;
-    mfxU16    NumChannel;
-    mfxU32    ChannelMapping;
     mfxU16    reserved[12];
 } mfxExtVPP3DLut;
 MFX_PACK_END()

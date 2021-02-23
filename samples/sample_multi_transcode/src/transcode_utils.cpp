@@ -1507,6 +1507,38 @@ mfxStatus ParseVPPCmdLine(msdk_char *argv[], mfxU32 argc, mfxU32& index, Transco
         }
         return MFX_ERR_NONE;
     }
+    else if (0 == msdk_strcmp(argv[index], MSDK_STRING("-3dlut")))
+    {
+        // 3dult is requested to be enabled by APP
+        if (params->p3DLutParam == NULL)
+        {
+            params->p3DLutParam  = (s3DLutParam*) malloc(sizeof(s3DLutParam));
+            memset(params->p3DLutParam, 0, sizeof(s3DLutParam));
+        }
+        s3DLutParam* p3DLutParam = params->p3DLutParam;
+        if (p3DLutParam)
+        {
+            VAL_CHECK(index+1 == argc, index, argv[index]);
+            index++;
+            // 3dlut file
+            if (msdk_strlen(argv[index]) < MSDK_ARRAY_LEN(p3DLutParam->str3DLutFile))
+            {
+                msdk_opt_read(argv[index], p3DLutParam->str3DLutFile);
+            }
+            else
+            {
+                return MFX_ERR_UNSUPPORTED;
+            }
+            // 3dlut attribute by default
+            p3DLutParam->nSegmentSize      = 65;
+            p3DLutParam->nMultipleSize     = 128;
+            p3DLutParam->nNumChannel       = 4;
+            p3DLutParam->nBitDepth         = 16;
+            p3DLutParam->nChannelMapping   = 0;
+        }
+
+        return MFX_ERR_NONE;
+    }
 
     return MFX_ERR_MORE_DATA;
 }

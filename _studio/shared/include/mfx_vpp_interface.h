@@ -257,14 +257,13 @@ namespace MfxHwVideoProcessing
         };
 
         struct Lut3DInfo {
-            bool      enabled;
-            mfxMemId  Mem3DLut;    // App create 3DLUT memory, pass to MSDK, must be linear for XPU
-            mfxU16    IOPattern;
-            mfxU16    SegmentSize;
-            mfxU16    MultipleSize;
-            mfxU16    BitDepth;
-            mfxU16    NumChannel;
-            mfxU32    ChannelMapping;
+            bool                      enabled;
+            mfxMemId                  MemID;
+            mfxU16                    IOPattern;
+            mfxU16                    Size;
+            mfxVariantType            DataPrecision;
+            mfx3DLutMemoryLayout      MemoryLayout;
+            mfx3DLutChannelMapping    ChannelMapping;
         };
 
     public:

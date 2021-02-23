@@ -2041,13 +2041,11 @@ mfxStatus VideoVPPHW::GetVideoParams(mfxVideoParam *par) const
         {
             mfxExtVPP3DLut *bufSc = reinterpret_cast<mfxExtVPP3DLut *>(par->ExtParam[i]);
             MFX_CHECK_NULL_PTR1(bufSc);
-            bufSc->Mem3DLut         = m_executeParams.Mem3DLut;
-            bufSc->IOPattern        = m_executeParams.IOPattern;
-            bufSc->SegmentSize      = m_executeParams.SegmentSize;
-            bufSc->MultipleSize     = m_executeParams.MultipleSize;
-            bufSc->BitDepth         = m_executeParams.BitDepth;
-            bufSc->NumChannel       = m_executeParams.NumChannel;
-            bufSc->ChannelMapping   = m_executeParams.ChannelMapping;
+            bufSc->MemID            = m_executeParams.lut3DInfo.MemID;
+            bufSc->Size             = m_executeParams.lut3DInfo.Size;
+            bufSc->DataPrecision    = m_executeParams.lut3DInfo.DataPrecision;
+            bufSc->MemoryLayout     = m_executeParams.lut3DInfo.MemoryLayout;
+            bufSc->ChannelMapping   = m_executeParams.lut3DInfo.ChannelMapping;
         }
 #if (MFX_VERSION >= 1025)
         else if (MFX_EXTBUFF_VPP_COLOR_CONVERSION == bufferId)
@@ -5690,13 +5688,13 @@ mfxStatus ConfigureExecuteParams(
                             mfxExtVPP3DLut *ext3DLUT = (mfxExtVPP3DLut*) videoParam.ExtParam[i];
                             if (ext3DLUT)
                             {
-                                executeParams.lut3DInfo.Mem3DLut        = mfxExtVPP3DLut->Mem3DLut;
-                                executeParams.lut3DInfo.IOPattern       = mfxExtVPP3DLut->IOPattern;
-                                executeParams.lut3DInfo.SegmentSize     = mfxExtVPP3DLut->SegmentSize;
-                                executeParams.lut3DInfo.MultipleSize    = mfxExtVPP3DLut->MultipleSize;
-                                executeParams.lut3DInfo.BitDepth        = mfxExtVPP3DLut->BitDepth;
-                                executeParams.lut3DInfo.NumChannel      = mfxExtVPP3DLut->NumChannel;
-                                executeParams.lut3DInfo.ChannelMapping  = mfxExtVPP3DLut->ChannelMapping;
+                                executeParams.lut3DInfo.enabled         = true;
+                                executeParams.lut3DInfo.MemID           = ext3DLUT->MemID;
+                                executeParams.lut3DInfo.Size            = ext3DLUT->Size;
+                                executeParams.lut3DInfo.DataPrecision   = ext3DLUT->DataPrecision;
+                                executeParams.lut3DInfo.MemoryLayout    = ext3DLUT->MemoryLayout;
+                                executeParams.lut3DInfo.ChannelMapping  = ext3DLUT->ChannelMapping;
+                                executeParams.lut3DInfo.IOPattern       = videoParam.IOPattern;
                             }
                         }
                     }

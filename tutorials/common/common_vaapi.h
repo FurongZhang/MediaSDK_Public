@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Intel Corporation
+// Copyright (c) 2021 Intel Corporation
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -42,3 +42,9 @@ void ClearRGBSurfaceVAAPI(mfxMemId memId);
 
 // utility
 mfxStatus va_to_mfx_status(VAStatus va_res);
+
+mfxStatus Create3DLutVAAPI(mfxMemId memId);
+mfxStatus Destroy3DLutVAAPI(mfxMemId memId);
+mfxStatus Dump3DLutVAAPI(mfxMemId memId, FILE *fp);
+
+

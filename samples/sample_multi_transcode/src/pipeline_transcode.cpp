@@ -77,6 +77,112 @@ namespace TranscodingSample
 }
 #endif
 
+#if 0//defined(LINUX32) || defined(LINUX64)
+
+#include <va/va.h>
+#include <va/va_vpp.h>
+
+#include "vaapi_allocator.h"
+void *g_pVADisplay = NULL;
+
+mfxStatus Create3DLutVAAPI(mfxMemId memId, FILE *fp)
+{
+    VAStatus va_status;
+    VAImage surface_image;
+    void *surface_p = NULL;
+    mfxU32 frame_size, lut3d_size;
+    unsigned char * newImageBuffer = NULL;
+    VASurfaceID surface_id;
+    mfxU32 seg_size = 65, mul_size = 128;
+
+    if ((fp == NULL) || (memId == NULL)) {
+        return MFX_ERR_NULL_PTR;
+    }
+
+    const MfxLoader::VA_Proxy m_libva;
+
+    //VADisplay m_va_dpy = *hdl;
+
+    // create VA surface
+    VASurfaceAttrib    surface_attrib;
+    surface_attrib.type =  VASurfaceAttribPixelFormat;
+    surface_attrib.flags = VA_SURFACE_ATTRIB_SETTABLE;
+    surface_attrib.value.type = VAGenericValueTypeInteger;
+    surface_attrib.value.value.i = VA_FOURCC_RGBA;
+
+    va_status =m_libva->vaCreateSurfaces(m_dpy,
+                                 VA_RT_FORMAT_RGB32,
+                                 seg_size * mul_size,
+                                 seg_size * 2,
+                                 &surface_id,
+                                 1,
+                                 &surface_attrib,
+                                 1);
+
+    va_status = m_libva->vaSyncSurface (m_dpy,surface_id);
+    if (va_status != VA_STATUS_SUCCESS) {
+        printf("Load3DLutVAAPI vaSyncSurface 3dlut surface failed\n");
+        return MFX_ERR_UNSUPPORTED;
+    }
+
+    va_status = m_libva->vaDeriveImage(m_dpy, surface_id, &surface_image);
+    if (va_status != VA_STATUS_SUCCESS) {
+        printf("Load3DLutVAAPI vaDeriveImage from 3dlut surface failed\n");
+        return MFX_ERR_UNSUPPORTED;
+    }
+
+    va_status = m_libva->vaMapBuffer(m_dpy, surface_image.buf, &surface_p);
+    if (va_status != VA_STATUS_SUCCESS) {
+        printf("Load3DLutVAAPI vaMapBuffer from 3dlut surface failed\n");
+        return MFX_ERR_UNSUPPORTED;
+    }
+
+    if (surface_image.format.fourcc == VA_FOURCC_RGBA  && fp) {
+        /* 3DLUT surface is allocated to 32 bit RGB */
+        frame_size = surface_image.width * surface_image.height * 4;
+        newImageBuffer = (unsigned char*)malloc(frame_size);
+        assert(newImageBuffer);
+
+        fseek(fp, 0L, SEEK_END);
+        lut3d_size = ftell(fp);
+        rewind(fp);
+
+        uint32_t real_size = (frame_size > lut3d_size) ? lut3d_size : frame_size;
+
+        fread(newImageBuffer, real_size, 1, fp);
+        memcpy(surface_p, newImageBuffer, real_size);
+        printf("upload_data_to_3dlut: 3DLUT surface width %d, height %d, pitch %d, frame size %d, 3dlut file size: %d\n", surface_image.width, surface_image.height, surface_image.pitches[0],frame_size, lut3d_size);
+
+        {
+            FILE *fp = NULL;
+            fp = fopen("3dlut_1.dat", "wb");
+            fwrite(surface_p, 1, real_size, fp);
+            fclose(fp);
+            fp = nullptr;
+        }
+     }
+
+     if (newImageBuffer)  {
+         free(newImageBuffer);
+         newImageBuffer = NULL;
+     }
+
+     m_libva->vaUnmapBuffer(m_dpy, surface_image.buf);
+     m_libva->vaDestroyImage(m_dpy, surface_image.image_id);
+
+     *((VASurfaceID*)memId) = surface_id;
+
+     return MFX_ERR_NONE;
+}
+
+mfxStatus Destroy3DLutVAAPI(mfxMemId memId)
+{
+    return MFX_ERR_NONE;
+}
+
+
+
+#endif
 
 // set structure to define values
 sInputParams::sInputParams() : __sInputParams()
@@ -116,6 +222,7 @@ sInputParams::sInputParams() : __sInputParams()
     bDecoderPostProcessing = false;
     bROIasQPMAP = false;
 #endif
+    p3DLutParam = NULL;
 }
 
 CTranscodingPipeline::CTranscodingPipeline():
@@ -187,10 +294,12 @@ CTranscodingPipeline::CTranscodingPipeline():
     m_nRotationAngle = 0;
     m_bROIasQPMAP = false;
     m_bExtMBQP = false;
+    m_b3dlut = false;
 } //CTranscodingPipeline::CTranscodingPipeline()
 
 CTranscodingPipeline::~CTranscodingPipeline()
 {
+    m_b3dlut = false;
     Close();
 } //CTranscodingPipeline::CTranscodingPipeline()
 
@@ -669,6 +778,8 @@ mfxStatus CTranscodingPipeline::DecodeLastFrame(ExtendedSurface *pExtSurface)
     return sts;
 }
 
+extern mfxStatus Create3DLutVAAPI(mfxMemId memId, FILE *fp);
+
 mfxStatus CTranscodingPipeline::VPPOneFrame(ExtendedSurface *pSurfaceIn, ExtendedSurface *pExtSurface)
 {
     MFX_ITT_TASK("VPPOneFrame");
@@ -705,6 +816,33 @@ mfxStatus CTranscodingPipeline::VPPOneFrame(ExtendedSurface *pSurfaceIn, Extende
         {
             surface->RemoveExtBuffer<mfxExtVppMctf>();
         }
+    }
+#endif
+
+#if 1
+    if (!m_b3dlut)
+    {
+        auto lut = m_mfxVppParams.AddExtBuffer<mfxExtVPP3DLut>();
+        
+        // mfxHDL hdl;
+         // sts = m_pmfxSession->GetHandle(MFX_HANDLE_VA_DISPLAY, &hdl);
+        
+         mfxU32 lut3D_mem_id = 0;
+         FILE *fp = fopen("3dlut_65cubic.dat","rb");
+         if (fp)
+         {
+             // m_pMFXAllocator->Create3DLutVAAPI(&lut3D_mem_id, fp);
+             Create3DLutVAAPI(&lut3D_mem_id, fp);
+
+             lut->MemID               = &lut3D_mem_id;
+             lut->Size                = 65;
+             lut->DataPrecision       = MFX_VARIANT_TYPE_U16;
+             lut->MemoryLayout        = MFX_3DLUT_MEMORY_LAYOUT_INTEL_65LUT;
+             lut->ChannelMapping      = MFX_3DLUT_CHANNEL_MAPPING_RGB_RGB;
+             fclose(fp);
+             fp = NULL;
+         }
+         m_b3dlut = true;
     }
 #endif
 
@@ -2825,6 +2963,7 @@ mfxU32 CTranscodingPipeline::FileFourCC2EncFourCC(mfxU32 fcc)
         return fcc;
 }
 
+
 mfxStatus CTranscodingPipeline::InitVppMfxParams(sInputParams *pInParams)
 {
     MSDK_CHECK_POINTER(pInParams,  MFX_ERR_NULL_PTR);
@@ -3102,6 +3241,31 @@ mfxStatus CTranscodingPipeline::InitVppMfxParams(sInputParams *pInParams)
         fieldProc->OutField = (mfxU16) ((pInParams->fieldProcessingMode== FC_T2T || pInParams->fieldProcessingMode==FC_B2T) ?
             MFX_PICSTRUCT_FIELD_TFF :
             MFX_PICSTRUCT_FIELD_BFF);
+    }
+
+    if (pInParams->p3DLutParam)
+    {
+#if 1
+        auto lut = m_mfxVppParams.AddExtBuffer<mfxExtVPP3DLut>();
+
+       // mfxHDL hdl;
+        // sts = m_pmfxSession->GetHandle(MFX_HANDLE_VA_DISPLAY, &hdl);
+
+        mfxU32 lut3D_mem_id = 0;
+        FILE *fp = fopen(pInParams->p3DLutParam->str3DLutFile,"rb");
+        if (fp)
+        {
+            // m_pMFXAllocator->Create3DLutVAAPI(&lut3D_mem_id, fp);
+            Create3DLutVAAPI(&lut3D_mem_id, fp);
+            lut->MemID               = &lut3D_mem_id;
+            lut->Size                = 65;
+            lut->DataPrecision       = MFX_VARIANT_TYPE_U16;
+            lut->MemoryLayout        = MFX_3DLUT_MEMORY_LAYOUT_INTEL_65LUT;
+            lut->ChannelMapping      = MFX_3DLUT_CHANNEL_MAPPING_RGB_RGB;
+            fclose(fp);
+            fp = NULL;
+        }
+#endif
     }
 
     if (enhFilterCount)

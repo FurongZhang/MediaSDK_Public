@@ -129,7 +129,6 @@ namespace MfxHwVideoProcessing
         VAProcFilterCapFrameRateConversion m_frcCaps[2]; /* only two modes, 24p->60p and 30p->60p */
         mfxU32 m_frcCyclicCounter;
 #endif
-        VAProcFilterCap3DLUT         *m_3dlutCaps;
 
         VABufferID m_denoiseFilterID;
         VABufferID m_detailFilterID;
@@ -139,7 +138,6 @@ namespace MfxHwVideoProcessing
         VABufferID m_gpuPriorityID;
         mfxU32     m_deintFrameCount;
         VASurfaceID m_refForFRC[5];
-        VABufferID m_3dlutFilterID;
 
         VABufferID m_filterBufs[VAProcFilterCount];
         mfxU32 m_numFilterBufs;
@@ -150,7 +148,6 @@ namespace MfxHwVideoProcessing
         std::set<mfxU32> m_cachedReadyTaskIndex;
 
         mfxU32 m_MaxContextPriority;
-
         typedef struct
         {
             VASurfaceID surface;
@@ -162,6 +159,9 @@ namespace MfxHwVideoProcessing
         std::vector<ExtVASurface> m_feedbackCache;
 
         UMC::Mutex m_guard;
+
+        VAProcFilterCap3DLUT         *m_3dlutCaps = NULL;
+        VABufferID m_3dlutFilterID;
 
         mfxStatus Init( _mfxPlatformAccelerationService* pVADisplay, mfxVideoParam *pParams);
 

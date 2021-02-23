@@ -117,21 +117,21 @@ void CloseFile(FILE* fHdl)
 }
 
 mfxStatus ReadPlaneData(mfxU16 w, mfxU16 h, mfxU8* buf, mfxU8* ptr,
-                        mfxU16 pitch, mfxU16 offset, FILE* fSource)
+                        mfxU16 pitch, mfxU16 offset, FILE* fSource, mfxU16 nBitDepth)
 {
     mfxU32 nBytesRead;
     for (mfxU16 i = 0; i < h; i++) {
-        nBytesRead = (mfxU32) fread(buf, 1, w, fSource);
-        if (w != nBytesRead)
+        nBytesRead = (mfxU32) fread(buf, 1, w * (nBitDepth / 8), fSource);
+        if (w * (nBitDepth / 8) != nBytesRead)
             return MFX_ERR_MORE_DATA;
-        for (mfxU16 j = 0; j < w; j++)
-            ptr[i * pitch + j * 2 + offset] = buf[j];
+        memcpy(ptr + i * pitch + offset * (nBitDepth / 8), buf, w * (nBitDepth / 8));
     }
     return MFX_ERR_NONE;
 }
 
 mfxStatus LoadRawFrame(mfxFrameSurface1* pSurface, FILE* fSource)
 {
+    printf("Enter LoadRawFrame\n");
     if (!fSource) {
         // Simulate instantaneous access to 1000 "empty" frames.
         static int frameCount = 0;
@@ -145,6 +145,7 @@ mfxStatus LoadRawFrame(mfxFrameSurface1* pSurface, FILE* fSource)
     mfxU32 nBytesRead;
     mfxU16 w, h, i, pitch;
     mfxU8* ptr;
+    mfxU32 nBitDepth = 8;
     mfxFrameInfo* pInfo = &pSurface->Info;
     mfxFrameData* pData = &pSurface->Data;
 
@@ -156,32 +157,49 @@ mfxStatus LoadRawFrame(mfxFrameSurface1* pSurface, FILE* fSource)
         h = pInfo->Height;
     }
 
+    if (pInfo->FourCC == MFX_FOURCC_P010) {
+        nBitDepth = 16;
+    }
+
     pitch = pData->Pitch;
     ptr = pData->Y + pInfo->CropX + pInfo->CropY * pData->Pitch;
 
     // read luminance plane
     for (i = 0; i < h; i++) {
-        nBytesRead = (mfxU32) fread(ptr + i * pitch, 1, w, fSource);
-        if (w != nBytesRead)
+        nBytesRead = (mfxU32) fread(ptr + i * pitch, 1, w * (nBitDepth / 8), fSource);
+        if (w * (nBitDepth / 8) != nBytesRead)
             return MFX_ERR_MORE_DATA;
     }
 
-    mfxU8 buf[2048];        // maximum supported chroma width for nv12
-    w /= 2;
-    h /= 2;
+    mfxU8 buf[4096];        // maximum supported chroma width for nv12
     ptr = pData->UV + pInfo->CropX + (pInfo->CropY / 2) * pitch;
-    if (w > 2048)
-        return MFX_ERR_UNSUPPORTED;
 
-    // load V
-    sts = ReadPlaneData(w, h, buf, ptr, pitch, 1, fSource);
-    if (MFX_ERR_NONE != sts)
-        return sts;
-    // load U
-    ReadPlaneData(w, h, buf, ptr, pitch, 0, fSource);
-    if (MFX_ERR_NONE != sts)
-        return sts;
+    // load UV for P010 and NV12
+    if ((pInfo->FourCC == MFX_FOURCC_P010) || (pInfo->FourCC == MFX_FOURCC_NV12)) {
+        h /= 2;
+        if ((w * nBitDepth /8) > 4096)
+            return MFX_ERR_UNSUPPORTED;
+        sts = ReadPlaneData(w, h, buf, ptr, pitch, 0, fSource, nBitDepth);
+        if (MFX_ERR_NONE != sts)
+            return sts;
+    }
+    else {
+        w /= 2;
+        h /= 2;
+        if (w > 4096)
+            return MFX_ERR_UNSUPPORTED;
 
+        // load V
+        sts = ReadPlaneData(w, h, buf, ptr, pitch, 1, fSource, nBitDepth);
+        if (MFX_ERR_NONE != sts)
+            return sts;
+        // load U
+        ReadPlaneData(w, h, buf, ptr, pitch, 0, fSource, nBitDepth);
+        if (MFX_ERR_NONE != sts)
+            return sts;
+    }
+
+    printf("Exit LoadRawFrame\n");
     return MFX_ERR_NONE;
 }
 
