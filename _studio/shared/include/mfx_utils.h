@@ -431,7 +431,7 @@ inline mfxStatus CheckAndDestroyVAbuffer(VADisplay display, VABufferID & buffer_
     if (buffer_id != VA_INVALID_ID)
     {
         VAStatus vaSts = vaDestroyBuffer(display, buffer_id);
-        MFX_CHECK_WITH_ASSERT(VA_STATUS_SUCCESS == vaSts, MFX_ERR_DEVICE_FAILED);
+        // MFX_CHECK_WITH_ASSERT(VA_STATUS_SUCCESS == vaSts, MFX_ERR_DEVICE_FAILED);
 
         buffer_id = VA_INVALID_ID;
     }

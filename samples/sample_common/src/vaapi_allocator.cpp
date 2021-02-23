@@ -96,6 +96,213 @@ unsigned int ConvertVP8FourccToMfxFourcc(mfxU32 fourcc)
     }
 }
 
+#if 1//defined(LINUX32) || defined(LINUX64)
+
+//#include <va/va.h>
+//#include <va/va_vpp.h>
+
+//#include "vaapi_allocator.h"
+VADisplay g_pVADisplay;
+
+//VADisplay m_dpy;
+MfxLoader::VA_Proxy * g_libva;
+
+
+mfxStatus Create3DLutVAAPI(mfxMemId memId, FILE *fp)
+{
+    VAStatus va_status;
+    VAImage surface_image;
+    void *surface_p = NULL;
+    mfxU32 frame_size, lut3d_size;
+    unsigned char * newImageBuffer = NULL;
+    VASurfaceID surface_id;
+    mfxU32 seg_size = 65, mul_size = 128;
+
+    if ((fp == NULL) || (memId == NULL)) {
+        return MFX_ERR_NULL_PTR;
+    }
+
+    //VADisplay m_va_dpy = *hdl;
+
+    // create VA surface
+    VASurfaceAttrib    surface_attrib;
+    surface_attrib.type =  VASurfaceAttribPixelFormat;
+    surface_attrib.flags = VA_SURFACE_ATTRIB_SETTABLE;
+    surface_attrib.value.type = VAGenericValueTypeInteger;
+    surface_attrib.value.value.i = VA_FOURCC_RGBA;
+
+    va_status =g_libva->vaCreateSurfaces(g_pVADisplay,
+                                 VA_RT_FORMAT_RGB32,
+                                 seg_size * mul_size,
+                                 seg_size * 2,
+                                 &surface_id,
+                                 1,
+                                 &surface_attrib,
+                                 1);
+
+    va_status = g_libva->vaSyncSurface (g_pVADisplay,surface_id);
+    if (va_status != VA_STATUS_SUCCESS) {
+        printf("Load3DLutVAAPI vaSyncSurface 3dlut surface failed\n");
+        return MFX_ERR_UNSUPPORTED;
+    }
+
+    va_status = g_libva->vaDeriveImage(g_pVADisplay, surface_id, &surface_image);
+    if (va_status != VA_STATUS_SUCCESS) {
+        printf("Load3DLutVAAPI vaDeriveImage from 3dlut surface failed\n");
+        return MFX_ERR_UNSUPPORTED;
+    }
+
+    va_status = g_libva->vaMapBuffer(g_pVADisplay, surface_image.buf, &surface_p);
+    if (va_status != VA_STATUS_SUCCESS) {
+        printf("Load3DLutVAAPI vaMapBuffer from 3dlut surface failed\n");
+        return MFX_ERR_UNSUPPORTED;
+    }
+
+    if (surface_image.format.fourcc == VA_FOURCC_RGBA  && fp) {
+        /* 3DLUT surface is allocated to 32 bit RGB */
+        frame_size = surface_image.width * surface_image.height * 4;
+        newImageBuffer = (unsigned char*)malloc(frame_size);
+        assert(newImageBuffer);
+
+        fseek(fp, 0L, SEEK_END);
+        lut3d_size = ftell(fp);
+        rewind(fp);
+
+        uint32_t real_size = (frame_size > lut3d_size) ? lut3d_size : frame_size;
+
+        fread(newImageBuffer, real_size, 1, fp);
+        memcpy(surface_p, newImageBuffer, real_size);
+        printf("upload_data_to_3dlut: 3DLUT surface width %d, height %d, pitch %d, frame size %d, 3dlut file size: %d\n", surface_image.width, surface_image.height, surface_image.pitches[0],frame_size, lut3d_size);
+
+        {
+            FILE *fp = NULL;
+            fp = fopen("3dlut_1.dat", "wb");
+            fwrite(surface_p, 1, real_size, fp);
+            fclose(fp);
+            fp = nullptr;
+        }
+     }
+
+     if (newImageBuffer)  {
+         free(newImageBuffer);
+         newImageBuffer = NULL;
+     }
+
+     g_libva->vaUnmapBuffer(g_pVADisplay, surface_image.buf);
+     g_libva->vaDestroyImage(g_pVADisplay, surface_image.image_id);
+
+     *((VASurfaceID*)memId) = surface_id;
+
+     return MFX_ERR_NONE;
+}
+
+mfxStatus Destroy3DLutVAAPI(mfxMemId memId)
+{
+    return MFX_ERR_NONE;
+}
+
+
+
+#endif
+
+
+#if 0
+mfxStatus vaapiFrameAllocator::Create3DLutVAAPI(mfxMemId memId, FILE *fp)
+{
+    VAStatus va_status;
+    VAImage surface_image;
+    void *surface_p = NULL;
+    mfxU32 frame_size, lut3d_size;
+    unsigned char * newImageBuffer = NULL;
+    VASurfaceID surface_id;
+    mfxU32 seg_size = 65, mul_size = 128;
+
+    if ((fp == NULL) || (memId == NULL)) {
+        return MFX_ERR_NULL_PTR;
+    }
+
+    //const MfxLoader::VA_Proxy m_libva;
+
+    //VADisplay m_va_dpy = *hdl;
+
+    // create VA surface
+    VASurfaceAttrib    surface_attrib;
+    surface_attrib.type =  VASurfaceAttribPixelFormat;
+    surface_attrib.flags = VA_SURFACE_ATTRIB_SETTABLE;
+    surface_attrib.value.type = VAGenericValueTypeInteger;
+    surface_attrib.value.value.i = VA_FOURCC_RGBA;
+
+    va_status =m_libva->vaCreateSurfaces(m_dpy,
+                                 VA_RT_FORMAT_RGB32,
+                                 seg_size * mul_size,
+                                 seg_size * 2,
+                                 &surface_id,
+                                 1,
+                                 &surface_attrib,
+                                 1);
+
+    va_status = m_libva->vaSyncSurface (m_dpy,surface_id);
+    if (va_status != VA_STATUS_SUCCESS) {
+        printf("Load3DLutVAAPI vaSyncSurface 3dlut surface failed\n");
+        return MFX_ERR_UNSUPPORTED;
+    }
+
+    va_status = m_libva->vaDeriveImage(m_dpy, surface_id, &surface_image);
+    if (va_status != VA_STATUS_SUCCESS) {
+        printf("Load3DLutVAAPI vaDeriveImage from 3dlut surface failed\n");
+        return MFX_ERR_UNSUPPORTED;
+    }
+
+    va_status = m_libva->vaMapBuffer(m_dpy, surface_image.buf, &surface_p);
+    if (va_status != VA_STATUS_SUCCESS) {
+        printf("Load3DLutVAAPI vaMapBuffer from 3dlut surface failed\n");
+        return MFX_ERR_UNSUPPORTED;
+    }
+
+    if (surface_image.format.fourcc == VA_FOURCC_RGBA  && fp) {
+        /* 3DLUT surface is allocated to 32 bit RGB */
+        frame_size = surface_image.width * surface_image.height * 4;
+        newImageBuffer = (unsigned char*)malloc(frame_size);
+        assert(newImageBuffer);
+
+        fseek(fp, 0L, SEEK_END);
+        lut3d_size = ftell(fp);
+        rewind(fp);
+
+        uint32_t real_size = (frame_size > lut3d_size) ? lut3d_size : frame_size;
+
+        fread(newImageBuffer, real_size, 1, fp);
+        memcpy(surface_p, newImageBuffer, real_size);
+        printf("upload_data_to_3dlut: 3DLUT surface width %d, height %d, pitch %d, frame size %d, 3dlut file size: %d\n", surface_image.width, surface_image.height, surface_image.pitches[0],frame_size, lut3d_size);
+
+        {
+            FILE *fp = NULL;
+            fp = fopen("3dlut_1.dat", "wb");
+            fwrite(surface_p, 1, real_size, fp);
+            fclose(fp);
+            fp = nullptr;
+        }
+     }
+
+     if (newImageBuffer)  {
+         free(newImageBuffer);
+         newImageBuffer = NULL;
+     }
+
+     m_libva->vaUnmapBuffer(m_dpy, surface_image.buf);
+     m_libva->vaDestroyImage(m_dpy, surface_image.image_id);
+
+     *((VASurfaceID*)memId) = surface_id;
+
+     return MFX_ERR_NONE;
+}
+
+mfxStatus vaapiFrameAllocator::Destroy3DLutVAAPI(mfxMemId memId)
+{
+    return MFX_ERR_NONE;
+}
+#endif
+
 vaapiFrameAllocator::vaapiFrameAllocator()
     : m_dpy(0)
     , m_libva(new MfxLoader::VA_Proxy)
@@ -129,6 +336,10 @@ mfxStatus vaapiFrameAllocator::Init(mfxAllocatorParams *pParams)
     m_dpy = p_vaapiParams->m_dpy;
     m_export_mode = p_vaapiParams->m_export_mode;
     m_exporter = p_vaapiParams->m_exporter;
+
+    g_pVADisplay = m_dpy;
+    g_libva = m_libva;
+    
     return MFX_ERR_NONE;
 }
 

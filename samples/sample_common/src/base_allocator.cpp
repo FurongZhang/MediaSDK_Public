@@ -105,7 +105,16 @@ mfxStatus BaseFrameAllocator::CheckRequestType(mfxFrameAllocRequest *request)
     else
         return MFX_ERR_UNSUPPORTED;
 }
-
+#if 0
+mfxStatus BaseFrameAllocator::Create3DLutVAAPI(mfxMemId memId, FILE *fp)
+{
+    return MFX_ERR_NONE;
+}
+mfxStatus BaseFrameAllocator::Destroy3DLutVAAPI(mfxMemId memId)
+{
+    return MFX_ERR_NONE;
+}
+#endif
 mfxStatus BaseFrameAllocator::ReallocFrame(mfxMemId midIn, const mfxFrameInfo *info, mfxU16 memType, mfxMemId *midOut)
 {
     return ReallocImpl(midIn, info, memType, midOut);

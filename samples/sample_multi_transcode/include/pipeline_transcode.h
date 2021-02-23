@@ -137,6 +137,18 @@ namespace TranscodingSample
         mfxU16 FilterStrength;
     };
 
+    // this is a structure with 3dlut-parameteres
+    // that can be changed in run-time;
+    struct s3DLutParam
+    {
+        msdk_char      str3DLutFile[MSDK_MAX_FILENAME_LEN];   //3    //3DLut Binary File
+        mfxU16         nSegmentSize;
+        mfxU16         nMultipleSize;
+        mfxU16         nBitDepth;
+        mfxU16         nNumChannel;
+        mfxU32         nChannelMapping;
+    };
+
     struct sMctfRunTimeParams
     {
         sMctfRunTimeParams() : CurIdx(0)
@@ -379,6 +391,7 @@ namespace TranscodingSample
 #ifdef ENABLE_MCTF
         sMCTFParam mctfParam;
 #endif
+        s3DLutParam  *p3DLutParam;
     };
 
     struct PreEncAuxBuffer
@@ -873,6 +886,8 @@ namespace TranscodingSample
         bool m_bInsertIDR;
 
         bool m_rawInput;
+
+        bool m_b3dlut;
 
         std::unique_ptr<ExtendedBSStore>        m_pBSStore;
 

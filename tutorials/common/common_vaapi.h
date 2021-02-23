@@ -42,3 +42,9 @@ void ClearRGBSurfaceVAAPI(mfxMemId memId);
 
 // utility
 mfxStatus va_to_mfx_status(VAStatus va_res);
+
+mfxStatus Create3DLutVAAPI(mfxMemId memId);
+mfxStatus Destroy3DLutVAAPI(mfxMemId memId);
+mfxStatus Dump3DLutVAAPI(mfxMemId memId, FILE *fp);
+
+

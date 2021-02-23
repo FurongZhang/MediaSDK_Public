@@ -103,3 +103,22 @@ void ClearRGBSurfaceVMem(mfxMemId memId)
 {
     ClearRGBSurfaceVAAPI(memId);
 }
+
+mfxStatus Create3DLutVMem(mfxMemId memId)
+{
+    mfxStatus result = Create3DLutVAAPI(memId);
+
+    printf("Create3DLutVMem !\n");
+    return result;
+}
+
+mfxStatus Destroy3DLutVMem(mfxMemId memId)
+{
+    Destroy3DLutVAAPI(memId);
+}
+
+mfxStatus Dump3DLutVMem(mfxMemId memId, FILE *fp)
+{
+    Dump3DLutVAAPI(memId, fp);
+}
+

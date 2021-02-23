@@ -168,7 +168,7 @@ mfxStatus VAAPIVideoProcessing::Close(void)
         free(m_primarySurface4Composition);
         m_primarySurface4Composition = NULL;
     }
-
+#if 1
     mfxStatus sts = CheckAndDestroyVAbuffer(m_vaDisplay, m_denoiseFilterID);
     std::ignore = MFX_STS_TRACE(sts);
 
@@ -195,7 +195,7 @@ mfxStatus VAAPIVideoProcessing::Close(void)
 
         m_vaContextVPP = VA_INVALID_ID;
     }
-
+#endif
     if (m_vaConfig != VA_INVALID_ID)
     {
         vaSts = vaDestroyConfig( m_vaDisplay, m_vaConfig );
@@ -217,13 +217,13 @@ mfxStatus VAAPIVideoProcessing::Close(void)
     memset( (void*)&m_detailCaps, 0, sizeof(m_detailCaps));
     memset( (void*)&m_procampCaps,  0, sizeof(m_procampCaps));
     memset( (void*)&m_deinterlacingCaps, 0, sizeof(m_deinterlacingCaps));
-
+#if 0
     if (m_3dlutCaps)
     {
         free(m_3dlutCaps);
         m_3dlutCaps = NULL;
     }
-
+#endif
     return MFX_ERR_NONE;
 
 } // mfxStatus VAAPIVideoProcessing::Close(void)
@@ -426,7 +426,7 @@ mfxStatus VAAPIVideoProcessing::QueryCapabilities(mfxVppCaps& caps)
                                 m_vaContextVPP,
                                 VAProcFilter3DLUT,
                                 &m_3dlutCaps, &num_3dlut_caps);
-    MFX_CHECK(VA_STATUS_SUCCESS == vaSts, MFX_ERR_DEVICE_FAILED);
+    MFX_CHECK(((VA_STATUS_SUCCESS == vaSts) || (VA_STATUS_ERROR_MAX_NUM_EXCEEDED == vaSts)), MFX_ERR_DEVICE_FAILED);
     if (num_3dlut_caps != 0)
     {
         m_3dlutCaps = (VAProcFilterCap3DLUT*)malloc(sizeof(m_3dlutCaps) * num_3dlut_caps);
@@ -938,21 +938,22 @@ mfxStatus VAAPIVideoProcessing::Execute(mfxExecuteParams *pParams)
         if (pParams->lut3DInfo.enabled)
         {
             VAProcFilterParameterBuffer3DLUT lut3d_param;
-            /* Surface ID */
-            lut3d_param.surface         = pParams->lut3DInfo.Mem3DLut;
+            /* 3DLUT Surface */
+            lut3d_param.type            = VAProcFilter3DLUT;
+            lut3d_param.surface         = *((VASurfaceID*)pParams->lut3DInfo.Mem3DLut);
             lut3d_param.bit_depth       = pParams->lut3DInfo.BitDepth;
             lut3d_param.num_channel     = pParams->lut3DInfo.NumChannel;
             lut3d_param.segment_size    = pParams->lut3DInfo.SegmentSize;
             lut3d_param.multiple_size   = pParams->lut3DInfo.MultipleSize;
 
             /* create 3dlut fitler buffer */
-            va_status = vaCreateBuffer(va_dpy,
-                                       context_id,
-                                       VAProcFilterParameterBufferType,
-                                       sizeof(lut3d_param),
-                                       1,
-                                       &lut3d_param,
-                                       &m_3dlutFilterID);
+            vaSts = vaCreateBuffer((void*)m_vaDisplay,
+                                    m_vaContextVPP,
+                                    VAProcFilterParameterBufferType,
+                                    sizeof(lut3d_param),
+                                    1,
+                                    &lut3d_param,
+                                    &m_3dlutFilterID);
             m_filterBufs[m_numFilterBufs++] = m_3dlutFilterID;
         }
     }

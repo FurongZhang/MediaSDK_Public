@@ -63,7 +63,16 @@ public:
     virtual mfxStatus LockFrame(mfxMemId mid, mfxFrameData *ptr);
     virtual mfxStatus UnlockFrame(mfxMemId mid, mfxFrameData *ptr);
     virtual mfxStatus GetFrameHDL(mfxMemId mid, mfxHDL *handle);
-
+#if 0
+    virtual mfxStatus Create3DLutVAAPI(mfxMemId memId, FILE *fp)
+    {
+        return MFX_ERR_NONE;
+    }
+    virtual mfxStatus Destroy3DLutVAAPI(mfxMemId memId)
+    {
+        return MFX_ERR_NONE;
+    }
+#endif
 protected:
     virtual mfxStatus CheckRequestType(mfxFrameAllocRequest *request);
     virtual mfxStatus ReleaseResponse(mfxFrameAllocResponse *response);

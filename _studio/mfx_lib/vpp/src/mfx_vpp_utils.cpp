@@ -45,7 +45,8 @@ const mfxU32 g_TABLE_DO_NOT_USE [] =
 #endif
     MFX_EXTBUFF_VPP_VIDEO_SIGNAL_INFO,
     MFX_EXTBUFF_VPP_FIELD_PROCESSING,
-    MFX_EXTBUFF_VPP_MIRRORING
+    MFX_EXTBUFF_VPP_MIRRORING,
+    MFX_EXTBUFF_VPP_3DLUT
 };
 
 
@@ -69,7 +70,8 @@ const mfxU32 g_TABLE_DO_USE [] =
     MFX_EXTBUFF_VPP_DEINTERLACING,
     MFX_EXTBUFF_VPP_VIDEO_SIGNAL_INFO,
     MFX_EXTBUFF_VPP_FIELD_PROCESSING,
-    MFX_EXTBUFF_VPP_MIRRORING
+    MFX_EXTBUFF_VPP_MIRRORING,
+    MFX_EXTBUFF_VPP_3DLUT
 };
 
 
@@ -94,7 +96,8 @@ const mfxU32 g_TABLE_CONFIG [] =
 #if (MFX_VERSION >= 1025)
     MFX_EXTBUFF_VPP_COLOR_CONVERSION,
 #endif
-    MFX_EXTBUFF_VPP_MIRRORING
+    MFX_EXTBUFF_VPP_MIRRORING,
+    MFX_EXTBUFF_VPP_3DLUT
 };
 
 
@@ -125,7 +128,8 @@ const mfxU32 g_TABLE_EXT_PARAM [] =
 #if (MFX_VERSION >= 1025)
     MFX_EXTBUFF_VPP_COLOR_CONVERSION,
 #endif
-    MFX_EXTBUFF_VPP_MIRRORING
+    MFX_EXTBUFF_VPP_MIRRORING,
+    MFX_EXTBUFF_VPP_3DLUT
 };
 
 PicStructMode GetPicStructMode(mfxU16 inPicStruct, mfxU16 outPicStruct)
@@ -509,92 +513,92 @@ void ShowPipeline( std::vector<mfxU32> pipelineList )
         {
             case (mfxU32)MFX_EXTBUFF_VPP_DENOISE:
             {
-                fprintf(stderr, "DENOISE \n");
+                fprintf(stderr, "DENOISE %d \n", (mfxU32)pipelineList[filterIndx]);
                 break;
             }
 
             case (mfxU32)MFX_EXTBUFF_VPP_RSHIFT_IN:
             {
-                fprintf(stderr, "MFX_EXTBUFF_VPP_RSHIFT_IN \n");
+                fprintf(stderr, "MFX_EXTBUFF_VPP_RSHIFT_IN  %d\n", (mfxU32)pipelineList[filterIndx]);
                 break;
             }
 
             case (mfxU32)MFX_EXTBUFF_VPP_RSHIFT_OUT:
             {
-                fprintf(stderr, "MFX_EXTBUFF_VPP_RSHIFT_OUT \n");
+                fprintf(stderr, "MFX_EXTBUFF_VPP_RSHIFT_OUT %d\n", (mfxU32)pipelineList[filterIndx]);
                 break;
             }
 
             case (mfxU32)MFX_EXTBUFF_VPP_LSHIFT_IN:
             {
-                fprintf(stderr, "MFX_EXTBUFF_VPP_LSHIFT_IN \n");
+                fprintf(stderr, "MFX_EXTBUFF_VPP_LSHIFT_IN %d\n", (mfxU32)pipelineList[filterIndx]);
                 break;
             }
 
             case (mfxU32)MFX_EXTBUFF_VPP_LSHIFT_OUT:
             {
-                fprintf(stderr, "MFX_EXTBUFF_VPP_LSHIFT_OUT \n");
+                fprintf(stderr, "MFX_EXTBUFF_VPP_LSHIFT_OUT %d\n", (mfxU32)pipelineList[filterIndx]);
                 break;
             }
 
             case (mfxU32)MFX_EXTBUFF_VPP_RESIZE:
             {
-                 fprintf(stderr, "RESIZE \n");
+                 fprintf(stderr, "RESIZE %d\n", (mfxU32)pipelineList[filterIndx]);
                  break;
             }
 
             case (mfxU32)MFX_EXTBUFF_VPP_FRAME_RATE_CONVERSION:
             {
-                fprintf(stderr, "FRC \n");
+                fprintf(stderr, "FRC %d\n", (mfxU32)pipelineList[filterIndx]);
                 break;
             }
 
             case (mfxU32)MFX_EXTBUFF_VPP_DI_30i60p:
             {
-                fprintf(stderr, "ADV DI 30i60p \n");
+                fprintf(stderr, "ADV DI 30i60p %d\n", (mfxU32)pipelineList[filterIndx]);
                 break;
             }
 
             case (mfxU32)MFX_EXTBUFF_VPP_DI_WEAVE:
             {
-                fprintf(stderr, "WEAVE DI\n");
+                fprintf(stderr, "WEAVE DI %d\n", (mfxU32)pipelineList[filterIndx]);
                 break;
             }
 
             case (mfxU32)MFX_EXTBUFF_VPP_ITC:
             {
-                fprintf(stderr, "ITC \n");
+                fprintf(stderr, "ITC %d\n", (mfxU32)pipelineList[filterIndx]);
 
                 break;
             }
 
             case (mfxU32)MFX_EXTBUFF_VPP_DI:
             {
-                fprintf(stderr, "DI \n");
+                fprintf(stderr, "DI  %d\n", (mfxU32)pipelineList[filterIndx]);
                 break;
             }
 
             case (mfxU32)MFX_EXTBUFF_VPP_DEINTERLACING:
             {
-                fprintf(stderr, "DI EXT BUF\n");
+                fprintf(stderr, "DI EXT BUF %d\n", (mfxU32)pipelineList[filterIndx]);
                 break;
             }
 
             case (mfxU32)MFX_EXTBUFF_VPP_CSC:
             {
-                fprintf(stderr, "CSC_NV12 \n");
+                fprintf(stderr, "CSC_NV12 %d\n", (mfxU32)pipelineList[filterIndx]);
                 break;
             }
 
             case (mfxU32)MFX_EXTBUFF_VPP_CSC_OUT_RGB4:
             {
-                fprintf(stderr,"%s \n", "CSC_RGB4");
+                fprintf(stderr,"%s  %d\n", "CSC_RGB4", (mfxU32)pipelineList[filterIndx]);
                 break;
             }
 
             case (mfxU32)MFX_EXTBUFF_VPP_CSC_OUT_A2RGB10:
             {
-                fprintf(stderr, "CSC_A2RGB10 \n");
+                fprintf(stderr, "CSC_A2RGB10 %d\n", (mfxU32)pipelineList[filterIndx]);
                 break;
             }
 
@@ -674,9 +678,14 @@ void ShowPipeline( std::vector<mfxU32> pipelineList )
                 break;
             }
 #endif
+            case (mfxU32)MFX_EXTBUFF_VPP_3DLUT:
+            {
+                fprintf(stderr, "MFX_EXTBUFF_VPP_3DLUT %d\n", (mfxU32)pipelineList[filterIndx]);
+                break;
+            }
             default:
             {
-                fprintf(stderr, "UNKNOWN Filter ID!!! \n");
+                fprintf(stderr, "UNKNOWN Filter ID!!! %d\n", (mfxU32)pipelineList[filterIndx]);
                 break;
             }
 
@@ -790,6 +799,12 @@ void ReorderPipelineListForQuality( std::vector<mfxU32> & pipelineList )
     if( IsFilterFound( &pipelineList[0], (mfxU32)pipelineList.size(), MFX_EXTBUFF_VPP_FRAME_RATE_CONVERSION ) )
     {
         newList[index] = MFX_EXTBUFF_VPP_FRAME_RATE_CONVERSION;
+        index++;
+    }
+
+    if( IsFilterFound( &pipelineList[0], (mfxU32)pipelineList.size(), MFX_EXTBUFF_VPP_3DLUT ) )
+    {
+        newList[index] = MFX_EXTBUFF_VPP_3DLUT;
         index++;
     }
 
@@ -1198,7 +1213,6 @@ mfxStatus GetPipelineList(
     /* *************************************************************************** */
     mfxU32 configCount = std::max<mfxU32>(sizeof(g_TABLE_CONFIG) / sizeof(*g_TABLE_CONFIG), videoParam->NumExtParam);
     std::vector<mfxU32> configList(configCount);
-
     GetConfigurableFilterList( videoParam, &configList[0], &configCount );
 
     /* [FrameRateConversion] FILTER */
@@ -1250,6 +1264,15 @@ mfxStatus GetPipelineList(
         if( !IsFilterFound( &pipelineList[0], (mfxU32)pipelineList.size(), MFX_EXTBUFF_VPP_VIDEO_SIGNAL_INFO ) )
         {
             pipelineList.push_back( MFX_EXTBUFF_VPP_VIDEO_SIGNAL_INFO );
+        }
+    }
+
+    if( IsFilterFound( &configList[0], configCount, MFX_EXTBUFF_VPP_3DLUT ) && !IsFilterFound(&pipelineList[0], (mfxU32)pipelineList.size(), MFX_EXTBUFF_VPP_3DLUT) )
+    {
+        if( !IsFilterFound( &pipelineList[0], (mfxU32)pipelineList.size(), MFX_EXTBUFF_VPP_3DLUT ) )
+        {
+            pipelineList.push_back( MFX_EXTBUFF_VPP_3DLUT );
+            printf("MFX_EXTBUFF_VPP_3DLUT Is pushed back in pipelineList!\n");
         }
     }
 
@@ -1404,8 +1427,14 @@ mfxStatus CheckFrameInfo(mfxFrameInfo* info, mfxU32 request, eMFXHWType platform
     }
 
     /* checking Height based on PicStruct filed */
-    if (MFX_PICSTRUCT_PROGRESSIVE & info->PicStruct ||
-        MFX_PICSTRUCT_FIELD_SINGLE & info->PicStruct)
+    if (MFX_PICSTRUCT_PROGRESSIVE & info->PicStruct)
+    {
+        if ((info->Height  & 4) !=0)
+        {
+            return MFX_ERR_INVALID_VIDEO_PARAM;
+        }
+    }
+    else if (MFX_PICSTRUCT_FIELD_SINGLE & info->PicStruct)
     {
         if ((info->Height  & 15) !=0)
         {
@@ -1634,6 +1663,9 @@ bool GetExtParamList(
         {
             bResOK = false; //invalid ID
         }
+#ifdef _DEBUG
+        printf("GetExtParamList curId %d\n", curId);
+#endif
     }
 
     return bResOK;
@@ -2092,7 +2124,6 @@ mfxStatus CheckExtParam(VideoCORE * core, mfxExtBuffer** ppExtParam, mfxU16 coun
         }
     }
 
-
     if( bError )
     {
         return MFX_ERR_INVALID_VIDEO_PARAM;
@@ -2105,6 +2136,8 @@ mfxStatus CheckExtParam(VideoCORE * core, mfxExtBuffer** ppExtParam, mfxU16 coun
     {
         return MFX_ERR_NONE;
     }
+
+    return MFX_ERR_NONE;
 
 } // mfxStatus CheckExtParam(mfxExtBuffer** ppExtParam, mfxU32 count)
 
