@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2020 Intel Corporation
+// Copyright (c) 2017-2021 Intel Corporation
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -129,6 +129,7 @@ namespace MfxHwVideoProcessing
         VAProcFilterCapFrameRateConversion m_frcCaps[2]; /* only two modes, 24p->60p and 30p->60p */
         mfxU32 m_frcCyclicCounter;
 #endif
+        VAProcFilterCap3DLUT         *m_3dlutCaps;
 
         VABufferID m_denoiseFilterID;
         VABufferID m_detailFilterID;
@@ -138,6 +139,7 @@ namespace MfxHwVideoProcessing
         VABufferID m_gpuPriorityID;
         mfxU32     m_deintFrameCount;
         VASurfaceID m_refForFRC[5];
+        VABufferID m_3dlutFilterID;
 
         VABufferID m_filterBufs[VAProcFilterCount];
         mfxU32 m_numFilterBufs;

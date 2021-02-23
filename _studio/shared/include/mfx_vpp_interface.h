@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2020 Intel Corporation
+// Copyright (c) 2018-2021 Intel Corporation
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -186,6 +186,8 @@ namespace MfxHwVideoProcessing
 
         mfxU32 uMirroring;
 
+        mfxU32 u3DLut;
+
         mfxVppCaps()
             : uAdvancedDI(0)
             , uSimpleDI(0)
@@ -213,6 +215,7 @@ namespace MfxHwVideoProcessing
             , uChromaSiting(0)
             , mFormatSupport()
             , uMirroring(0)
+            , u3DLut(0)
         {
         };
     };
@@ -251,6 +254,17 @@ namespace MfxHwVideoProcessing
                     || TransferMatrix != other.TransferMatrix
                     || NominalRange   != other.NominalRange;
             }
+        };
+
+        struct Lut3DInfo {
+            bool      enabled;
+            mfxMemId  Mem3DLut;    // App create 3DLUT memory, pass to MSDK, must be linear for XPU
+            mfxU16    IOPattern;
+            mfxU16    SegmentSize;
+            mfxU16    MultipleSize;
+            mfxU16    BitDepth;
+            mfxU16    NumChannel;
+            mfxU32    ChannelMapping;
         };
 
     public:
@@ -328,6 +342,7 @@ namespace MfxHwVideoProcessing
 
                    VideoSignalInfo.clear();
                    VideoSignalInfo.assign(1, VideoSignalInfoIn);
+                   memset(&lut3DInfo, 0, sizeof(Lut3DInfo));
             };
 
             bool IsDoNothing()
@@ -362,6 +377,7 @@ namespace MfxHwVideoProcessing
 #ifdef MFX_ENABLE_MCTF
                     || bEnableMctf != false
 #endif
+                    || lut3DInfo.enabled != false
                 )
                     return false;
                 if (VideoSignalInfoIn != VideoSignalInfoOut)
@@ -457,6 +473,8 @@ namespace MfxHwVideoProcessing
 #endif
 #endif
         bool reset;
+
+        Lut3DInfo    lut3DInfo;
     };
 
     class DriverVideoProcessing

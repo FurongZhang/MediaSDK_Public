@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2020 Intel Corporation
+// Copyright (c) 2018-2021 Intel Corporation
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -2286,6 +2286,11 @@ void ConvertCaps2ListDoUse(MfxHwVideoProcessing::mfxVppCaps& caps, std::vector<m
     if(caps.uScaling)
     {
         list.push_back(MFX_EXTBUFF_VPP_SCALING);
+    }
+
+    if(caps.u3DLut)
+    {
+        list.push_back(MFX_EXTBUFF_VPP_3DLUT);
     }
 
 #if (MFX_VERSION >= 1025)
