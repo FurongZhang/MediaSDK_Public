@@ -151,6 +151,11 @@ mfxStatus GetExternalFramesCount(VideoCORE* core,
                 break;
             }
 
+            case (mfxU32)MFX_EXTBUFF_VPP_3DLUT:
+            {
+                break;
+            }
+
             case (mfxU32)MFX_EXTBUFF_VPP_DEINTERLACING:
             {
                 break;

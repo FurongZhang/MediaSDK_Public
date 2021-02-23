@@ -116,6 +116,10 @@ void ClearYUVSurfaceSysMem(mfxFrameSurface1* pSfc, mfxU16 width, mfxU16 height);
 void ClearYUVSurfaceVMem(mfxMemId memId);
 void ClearRGBSurfaceVMem(mfxMemId memId);
 
+mfxStatus Create3DLutVMem(mfxMemId memId);
+mfxStatus Destroy3DLutVMem(mfxMemId memId);
+mfxStatus Dump3DLutVMem(mfxMemId memId, FILE *fp);
+
 // Get free raw frame surface
 int GetFreeSurfaceIndex(mfxFrameSurface1** pSurfacesPool, mfxU16 nPoolSize);
 int GetFreeSurfaceIndex(const std::vector<mfxFrameSurface1>& pSurfacesPool);

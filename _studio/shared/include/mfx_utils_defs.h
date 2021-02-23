@@ -25,7 +25,9 @@
 #include <vector>
 #include <memory>
 #include <assert.h>
-
+#ifdef _debug
+#define MFX_DEBUG_TRACE
+#endif
 #ifndef MFX_DEBUG_TRACE
 #define MFX_STS_TRACE(sts) sts
 #else

@@ -50,7 +50,10 @@ public:
     virtual mfxStatus UnlockFrame(mfxMemId mid, mfxFrameData *ptr) = 0;
     virtual mfxStatus GetFrameHDL(mfxMemId mid, mfxHDL *handle) = 0;
     virtual mfxStatus FreeFrames(mfxFrameAllocResponse *response) = 0;
-
+#if 0
+    virtual mfxStatus Create3DLutVAAPI(mfxMemId memId, FILE *fp) = 0;
+    virtual mfxStatus Create3DLutVAAPI(mfxMemId memId) = 0;
+#endif
 private:
     static mfxStatus MFX_CDECL  Alloc_(mfxHDL pthis, mfxFrameAllocRequest *request, mfxFrameAllocResponse *response);
     static mfxStatus MFX_CDECL  Lock_(mfxHDL pthis, mfxMemId mid, mfxFrameData *ptr);
@@ -79,7 +82,10 @@ public:
     virtual mfxStatus AllocFrames(mfxFrameAllocRequest *request, mfxFrameAllocResponse *response);
     virtual mfxStatus ReallocFrame(mfxMemId midIn, const mfxFrameInfo *info, mfxU16 memType, mfxMemId *midOut);
     virtual mfxStatus FreeFrames(mfxFrameAllocResponse *response);
-
+#if 0
+    virtual mfxStatus Create3DLutVAAPI(mfxMemId memId, FILE *fp);
+    virtual mfxStatus Destroy3DLutVAAPI(mfxMemId memId);
+#endif
 protected:
     std::mutex mtx;
     typedef std::list<mfxFrameAllocResponse>::iterator Iter;
