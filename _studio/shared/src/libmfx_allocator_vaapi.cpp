@@ -74,6 +74,8 @@ static inline unsigned int ConvertMfxFourccToVAFormat(mfxU32 fourcc)
     case MFX_FOURCC_RGBP:
         return VA_FOURCC_RGBP;
 #endif
+    case MFX_FOURCC_BGRP:
+        return VA_FOURCC_BGRP;
 #ifndef ANDROID
     case MFX_FOURCC_A2RGB10:
         return VA_FOURCC_A2R10G10B10;
@@ -147,6 +149,7 @@ static void FillSurfaceAttrs(std::vector<VASurfaceAttrib> &attrib, unsigned int 
             format = VA_RT_FORMAT_RGB32_10BPP;
             break;
         case MFX_FOURCC_RGBP:
+        case MFX_FOURCC_BGRP:
             format = VA_RT_FORMAT_RGBP;
             break;
         case MFX_FOURCC_RGB4:
@@ -182,6 +185,7 @@ static inline bool isFourCCSupported(unsigned int va_fourcc)
 #ifdef MFX_ENABLE_RGBP
         case VA_FOURCC_RGBP:
 #endif
+        case VA_FOURCC_BGRP:
         case VA_FOURCC_UYVY:
         case VA_FOURCC_P208:
         case VA_FOURCC_P010:
@@ -530,12 +534,21 @@ mfxStatus mfxDefaultAllocatorVAAPI::SetFrameData(const VAImage &va_image, mfxU32
         if (mfx_fourcc != va_image.format.fourcc) return MFX_ERR_LOCK_MEMORY;
 
         {
+            ptr->R = p_buffer + va_image.offsets[0];
+            ptr->G = p_buffer + va_image.offsets[1];
+            ptr->B = p_buffer + va_image.offsets[2];
+        }
+        break;
+#endif
+    case VA_FOURCC_BGRP:
+        if (mfx_fourcc != va_image.format.fourcc) return MFX_ERR_LOCK_MEMORY;
+
+        {
             ptr->B = p_buffer + va_image.offsets[0];
             ptr->G = p_buffer + va_image.offsets[1];
             ptr->R = p_buffer + va_image.offsets[2];
         }
         break;
-#endif
     case VA_FOURCC_ABGR:
         if (mfx_fourcc == MFX_FOURCC_BGR4)
         {

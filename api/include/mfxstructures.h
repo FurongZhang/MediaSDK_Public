@@ -127,6 +127,7 @@ enum {
     MFX_FOURCC_NV21         = MFX_MAKEFOURCC('N', 'V', '2', '1'), /* Same as NV12 but with weaved V and U values. */
     MFX_FOURCC_IYUV         = MFX_MAKEFOURCC('I', 'Y', 'U', 'V'), /* Same as  YV12 except that the U and V plane order is reversed. */
     MFX_FOURCC_I010         = MFX_MAKEFOURCC('I', '0', '1', '0'), /* 10-bit YUV 4:2:0, each component has its own plane. */
+    MFX_FOURCC_BGRP         = MFX_MAKEFOURCC('B','G','R','P'),
 };
 
 /* PicStruct */

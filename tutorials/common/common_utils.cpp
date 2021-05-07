@@ -371,6 +371,23 @@ mfxStatus WriteRawFrame(mfxFrameSurface1* pSurface, FILE* fSink)
             }
         }
     }
+    else if (pInfo->FourCC == MFX_FOURCC_RGBP || pInfo->FourCC == MFX_FOURCC_BGRP)
+    {
+        pitch = pData->Pitch;
+        ptr = std::min(std::min(pData->R, pData->G), pData->B);
+
+        for (i = 0; i < 3; i++)
+        {
+            for (i = 0; i < h; i++)
+            {
+                nByteWrite = (mfxU32)fwrite(ptr + i * pitch, 1, w, fSink);
+                if ((mfxU32)(w) != nByteWrite)
+                {
+                    return MFX_ERR_MORE_DATA;
+                }
+            }
+        }
+    }
     else
     {
         for (i = 0; i < pInfo->CropH; i++)

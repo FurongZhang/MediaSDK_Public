@@ -103,7 +103,7 @@ enum
 #if (MFX_VERSION <= 1027)
     MFX_FOURCC_RGBP         = MFX_MAKEFOURCC('R','G','B','P'),
 #endif
-    MFX_FOURCC_I420         = MFX_MAKEFOURCC('I','4','2','0')
+    MFX_FOURCC_I420         = MFX_MAKEFOURCC('I','4','2','0'),
 };
 
 enum ExtBRCType {

@@ -53,6 +53,8 @@ unsigned int ConvertMfxFourccToVAFormat(mfxU32 fourcc)
         return VA_FOURCC_ABGR;
     case MFX_FOURCC_RGBP:
         return VA_FOURCC_RGBP;
+    case MFX_FOURCC_BGRP:
+        return VA_FOURCC_BGRP;
     case MFX_FOURCC_P8:
         return VA_FOURCC_P208;
     case MFX_FOURCC_P010:
@@ -161,6 +163,7 @@ static mfxStatus GetVAFourcc(mfxU32 fourcc, unsigned int &va_fourcc)
         (VA_FOURCC_ARGB != va_fourcc) &&
         (VA_FOURCC_ABGR != va_fourcc) &&
         (VA_FOURCC_RGBP != va_fourcc) &&
+        (VA_FOURCC_BGRP != va_fourcc) &&
         (VA_FOURCC_P208 != va_fourcc) &&
         (VA_FOURCC_P010 != va_fourcc) &&
         (VA_FOURCC_YUY2 != va_fourcc) &&
@@ -328,7 +331,7 @@ mfxStatus vaapiFrameAllocator::AllocImpl(mfxFrameAllocRequest *request, mfxFrame
             {
                 format = VA_RT_FORMAT_RGB32_10BPP;
             }
-            else if (fourcc == MFX_FOURCC_RGBP)
+            else if ((fourcc == MFX_FOURCC_RGBP) ||(fourcc == MFX_FOURCC_BGRP))
             {
                 format = VA_RT_FORMAT_RGBP;
             }
@@ -619,6 +622,15 @@ mfxStatus vaapiFrameAllocator::LockFrame(mfxMemId mid, mfxFrameData *ptr)
                 else return MFX_ERR_LOCK_MEMORY;
                 break;
             case VA_FOURCC_RGBP:
+                if (mfx_fourcc != vaapi_mid->m_image.format.fourcc) return MFX_ERR_LOCK_MEMORY;
+
+                {
+                    ptr->R = pBuffer + vaapi_mid->m_image.offsets[0];
+                    ptr->G = pBuffer + vaapi_mid->m_image.offsets[1];
+                    ptr->B = pBuffer + vaapi_mid->m_image.offsets[2];
+                }
+                break;
+            case VA_FOURCC_BGRP:
                 if (mfx_fourcc != vaapi_mid->m_image.format.fourcc) return MFX_ERR_LOCK_MEMORY;
 
                 {

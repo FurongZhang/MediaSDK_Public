@@ -68,6 +68,7 @@ mfxStatus CheckFrameInfoCommon(mfxFrameInfo  *info, mfxU32 /* codecId */)
 #ifdef MFX_ENABLE_RGBP
     case MFX_FOURCC_RGBP:
 #endif
+    case MFX_FOURCC_BGRP:
     case MFX_FOURCC_P010:
     case MFX_FOURCC_NV16:
     case MFX_FOURCC_P210:
@@ -553,6 +554,7 @@ mfxStatus CheckFramePointers(mfxFrameInfo const& info, mfxFrameData const& data)
 #ifdef MFX_ENABLE_RGBP
         case MFX_FOURCC_RGBP:
 #endif
+        case MFX_FOURCC_BGRP:
         case MFX_FOURCC_RGB3:        MFX_CHECK(data.R && data.G && data.B, MFX_ERR_UNDEFINED_BEHAVIOR); break;
 
         case MFX_FOURCC_AYUV:
@@ -976,6 +978,7 @@ mfxU32 GetMinPitch(mfxU32 fourcc, mfxU16 width)
 #ifdef MFX_ENABLE_RGBP
         case MFX_FOURCC_RGBP:
 #endif
+        case MFX_FOURCC_BGRP:
         case MFX_FOURCC_NV16:        return width * 1;
 #if defined (MFX_ENABLE_FOURCC_RGB565)
         case MFX_FOURCC_RGB565:      return width * 2;
@@ -1026,6 +1029,7 @@ mfxU8* GetFramePointer(mfxU32 fourcc, mfxFrameData const& data)
 #ifdef MFX_ENABLE_RGBP
         case MFX_FOURCC_RGBP:
 #endif
+        case MFX_FOURCC_BGRP:
         case MFX_FOURCC_ARGB16:
         case MFX_FOURCC_ABGR16:      return std::min({data.R, data.G, data.B}); break;
 #if defined (MFX_ENABLE_FOURCC_RGB565)

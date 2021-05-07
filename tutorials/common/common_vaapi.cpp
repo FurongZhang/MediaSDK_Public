@@ -179,6 +179,8 @@ unsigned int ConvertMfxFourccToVAFormat(mfxU32 fourcc)
         return VA_FOURCC_ARGB;
     case MFX_FOURCC_P8:
         return VA_FOURCC_P208;
+    case MFX_FOURCC_BGRP:
+        return VA_FOURCC_BGRP;
 
     default:
         assert(!"unsupported fourcc");
@@ -229,6 +231,8 @@ mfxStatus _simple_alloc(mfxFrameAllocRequest* request,
 
     va_fourcc = ConvertMfxFourccToVAFormat(fourcc);
     if (!va_fourcc || ((VA_FOURCC_NV12 != va_fourcc) &&
+                       (VA_FOURCC_RGBP != va_fourcc) &&
+                       (VA_FOURCC_BGRP != va_fourcc) &&
                        (VA_FOURCC_YV12 != va_fourcc) &&
                        (VA_FOURCC_YUY2 != va_fourcc) &&
                        (VA_FOURCC_ARGB != va_fourcc) &&
@@ -257,7 +261,7 @@ mfxStatus _simple_alloc(mfxFrameAllocRequest* request,
             attrib.flags = VA_SURFACE_ATTRIB_SETTABLE;
 
             va_res = vaCreateSurfaces(m_va_dpy,
-                                      VA_RT_FORMAT_YUV420,
+                                      VA_RT_FORMAT_RGBP,
                                       request->Info.Width,
                                       request->Info.Height,
                                       surfaces, surfaces_num,
@@ -414,6 +418,40 @@ mfxStatus simple_lock(mfxHDL pthis, mfxMemId mid, mfxFrameData* ptr)
                         pBuffer +
                         vaapi_mid->m_image.offsets[1];
                     ptr->V = ptr->U + 1;
+                } else
+                    mfx_res = MFX_ERR_LOCK_MEMORY;
+                break;
+            case VA_FOURCC_BGRP:
+                if (vaapi_mid->m_fourcc == MFX_FOURCC_BGRP) {
+                    ptr->Pitch =
+                        (mfxU16) vaapi_mid->
+                        m_image.pitches[0];
+                    ptr->B =
+                        pBuffer +
+                        vaapi_mid->m_image.offsets[0];
+                    ptr->G =
+                        pBuffer +
+                        vaapi_mid->m_image.offsets[1];
+                    ptr->R =
+                        pBuffer +
+                        vaapi_mid->m_image.offsets[2];
+                } else
+                    mfx_res = MFX_ERR_LOCK_MEMORY;
+                break;
+            case VA_FOURCC_RGBP:
+                if (vaapi_mid->m_fourcc == MFX_FOURCC_RGBP) {
+                    ptr->Pitch =
+                        (mfxU16) vaapi_mid->
+                        m_image.pitches[0];
+                    ptr->R =
+                        pBuffer +
+                        vaapi_mid->m_image.offsets[0];
+                    ptr->G =
+                        pBuffer +
+                        vaapi_mid->m_image.offsets[1];
+                    ptr->B =
+                        pBuffer +
+                        vaapi_mid->m_image.offsets[2];
                 } else
                     mfx_res = MFX_ERR_LOCK_MEMORY;
                 break;

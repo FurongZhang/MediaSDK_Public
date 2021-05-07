@@ -197,6 +197,7 @@ mfxStatus mfxDefaultAllocator::AllocFrames(mfxHDL pthis, mfxFrameAllocRequest *r
 #ifdef MFX_ENABLE_RGBP
     case MFX_FOURCC_RGBP:
 #endif
+    case MFX_FOURCC_BGRP:
         if ((request->Type & MFX_MEMTYPE_FROM_VPPIN) ||
             (request->Type & MFX_MEMTYPE_FROM_VPPOUT) )
         {
@@ -369,16 +370,24 @@ mfxStatus mfxDefaultAllocator::LockFrame(mfxHDL pthis, mfxHDL mid, mfxFrameData 
         ptr->R = ptr->B + 2;
         ptr->PitchHigh = (mfxU16)((3*ALIGN32(fs->info.Width)) / (1 << 16));
         ptr->PitchLow  = (mfxU16)((3*ALIGN32(fs->info.Width)) % (1 << 16));
-        break;
+        break;        
 #ifdef MFX_ENABLE_RGBP
-    case MFX_FOURCC_RGBP:
+        ptr->R = sptr;
+        case MFX_FOURCC_RGBP:
+        ptr->G = ptr->R + ptr->Pitch*Height2;
+        ptr->B = ptr->R + 2*ptr->Pitch*Height2;;
+        ptr->PitchHigh = (mfxU16)((3*ALIGN32(fs->info.Width)) / (1 << 16));
+        ptr->PitchLow  = (mfxU16)((3*ALIGN32(fs->info.Width)) % (1 << 16));
+        break;
+#endif
         ptr->B = sptr;
+        case MFX_FOURCC_BGRP:
         ptr->G = ptr->B + ptr->Pitch*Height2;
         ptr->R = ptr->B + 2*ptr->Pitch*Height2;;
         ptr->PitchHigh = (mfxU16)((3*ALIGN32(fs->info.Width)) / (1 << 16));
         ptr->PitchLow  = (mfxU16)((3*ALIGN32(fs->info.Width)) % (1 << 16));
         break;
-#endif
+
     case MFX_FOURCC_RGB4:
         ptr->B = sptr;
         ptr->G = ptr->B + 1;

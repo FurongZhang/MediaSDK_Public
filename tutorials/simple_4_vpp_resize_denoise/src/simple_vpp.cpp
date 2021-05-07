@@ -108,12 +108,12 @@ int main(int argc, char** argv)
         MSDK_ALIGN16(options.values.Height) :
         MSDK_ALIGN32(options.values.Height);
     // Output data
-    VPPParams.vpp.Out.FourCC = MFX_FOURCC_NV12;
-    VPPParams.vpp.Out.ChromaFormat = MFX_CHROMAFORMAT_YUV420;
+    VPPParams.vpp.Out.FourCC = MFX_FOURCC_BGRP;
+    // VPPParams.vpp.Out.ChromaFormat = MFX_CHROMAFORMAT_YUV420;
     VPPParams.vpp.Out.CropX = 0;
     VPPParams.vpp.Out.CropY = 0;
-    VPPParams.vpp.Out.CropW = options.values.Width / 2;
-    VPPParams.vpp.Out.CropH = options.values.Height / 2;
+    VPPParams.vpp.Out.CropW = options.values.Width;//options.values.Width / 2;
+    VPPParams.vpp.Out.CropH = options.values.Height;
     VPPParams.vpp.Out.PicStruct = MFX_PICSTRUCT_PROGRESSIVE;
     VPPParams.vpp.Out.FrameRateExtN = 30;
     VPPParams.vpp.Out.FrameRateExtD = 1;

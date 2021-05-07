@@ -111,23 +111,24 @@ int main(int argc, char** argv)
         MSDK_ALIGN16(options.values.Height) :
         MSDK_ALIGN32(options.values.Height);
     // Output data
-    VPPParams.vpp.Out.FourCC = MFX_FOURCC_NV12;
-    VPPParams.vpp.Out.ChromaFormat = MFX_CHROMAFORMAT_YUV420;
+    VPPParams.vpp.Out.FourCC = MFX_FOURCC_BGRP;
+    //VPPParams.vpp.Out.ChromaFormat = MFX_CHROMAFORMAT_YUV420;
     VPPParams.vpp.Out.CropX = 0;
     VPPParams.vpp.Out.CropY = 0;
-    VPPParams.vpp.Out.CropW = options.values.Width / 2;
-    VPPParams.vpp.Out.CropH = options.values.Height / 2;
+    VPPParams.vpp.Out.CropW = options.values.Width; // / 2;
+    VPPParams.vpp.Out.CropH = options.values.Height; // / 2;
     VPPParams.vpp.Out.PicStruct = MFX_PICSTRUCT_PROGRESSIVE;
     VPPParams.vpp.Out.FrameRateExtN = 30;
     VPPParams.vpp.Out.FrameRateExtD = 1;
     // width must be a multiple of 16
     // height must be a multiple of 16 in case of frame picture and a multiple of 32 in case of field picture
-    VPPParams.vpp.Out.Width = MSDK_ALIGN16(VPPParams.vpp.Out.CropW);
-    VPPParams.vpp.Out.Height =
+    VPPParams.vpp.Out.Width = options.values.Width; //MSDK_ALIGN16(VPPParams.vpp.Out.CropW);
+    VPPParams.vpp.Out.Height =options.values.Height;
+#if 0
         (MFX_PICSTRUCT_PROGRESSIVE == VPPParams.vpp.Out.PicStruct) ?
         MSDK_ALIGN16(VPPParams.vpp.Out.CropH) :
         MSDK_ALIGN32(VPPParams.vpp.Out.CropH);
-
+#endif
     VPPParams.IOPattern =
         MFX_IOPATTERN_IN_VIDEO_MEMORY | MFX_IOPATTERN_OUT_VIDEO_MEMORY;
 
